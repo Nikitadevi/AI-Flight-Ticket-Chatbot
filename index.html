@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>✈️ AI Flight Price Tracker Chatbot</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #dfe9f3, #ffffff);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background-image: url('https://cdn.pixabay.com/photo/2020/01/24/16/36/plane-4788543_1280.jpg');
+      background-size: cover;
+      background-position: center;
+    }
+    #header {
+      text-align: center;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.8);
+      font-size: 24px;
+      font-weight: bold;
+      color: #007bff;
+      text-shadow: 1px 1px 2px #ccc;
+    }
+    #chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      overflow-y: auto;
+      background-color: rgba(255, 255, 255, 0.8);
+    }
+    .message {
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 10px;
+      max-width: 70%;
+      display: flex;
+      align-items: center;
+      box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+    }
+    .user {
+      align-self: flex-end;
+      background-color: #007bff;
+      color: white;
+    }
+    .bot {
+      align-self: flex-start;
+      background-color: #f1f1f1;
+    }
+    .bot img {
+      width: 35px;
+      height: 35px;
+      margin-right: 10px;
+      border-radius: 50%;
+    }
+    #input-container {
+      display: flex;
+      padding: 10px;
+      background-color: rgba(255, 255, 255, 0.95);
+      border-top: 1px solid #ccc;
+    }
+    #user-input {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      margin-left: 10px;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    .suggestions {
+      display: flex;
+      gap: 10px;
+      padding: 10px;
+      flex-wrap: wrap;
+    }
+    .suggestion-btn {
+      padding: 5px 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="header">🤖 Welcome to SkyBot - Your ✈️ Flight Price Assistant</div>
+  <div id="chat-container"></div>
+  <div class="suggestions">
+    <button class="suggestion-btn" onclick="quickSend('Price from Delhi to Mumbai')">Delhi → Mumbai</button>
+    <button class="suggestion-btn" onclick="quickSend('Price from Bangalore to Chennai')">Bangalore → Chennai</button>
+    <button class="suggestion-btn" onclick="quickSend('Price from Kolkata to Pune')">Kolkata → Pune</button>
+    <button class="suggestion-btn" onclick="quickSend('Price from Hyderabad to Jaipur')">Hyderabad → Jaipur</button>
+    <button class="suggestion-btn" onclick="quickSend('Price from Mumbai to Goa')">Mumbai → Goa</button>
+    <button class="suggestion-btn" onclick="quickSend('Price from Lucknow to Delhi')">Lucknow → Delhi</button>
+    <button class="suggestion-btn" onclick="quickSend('Tell me a travel tip')">🧳 Travel Tip</button>
+    <button class="suggestion-btn" onclick="quickSend('Cheapest day to fly in May from Kerala')">💸 Best Deal Day</button>
+    <button class="suggestion-btn" onclick="quickSend('Help')">Help</button>
+  </div>
+  <div id="input-container">
+    <input type="text" id="user-input" placeholder="Type your question here..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+  <script>
+    const chatContainer = document.getElementById("chat-container");
+
+    function addMessage(text, sender, isTyping = false) {
+      const messageEl = document.createElement("div");
+      messageEl.className = message ${sender};
+
+      if (sender === "bot") {
+        const img = document.createElement("img");
+        img.src = "https://cdn-icons-png.flaticon.com/512/4712/4712100.png";
+        messageEl.appendChild(img);
+      }
+
+      const span = document.createElement("span");
+      if (isTyping) {
+        span.innerHTML = "<em>Typing...</em>";
+      } else {
+        span.innerHTML = text;
+        speak(text);
+      }
+      messageEl.appendChild(span);
+
+      chatContainer.appendChild(messageEl);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+      return span;
+    }
+
+    function speak(text) {
+      const utterance = new SpeechSynthesisUtterance(text.replace(/<[^>]+>/g, ''));
+      utterance.rate = 1;
+      utterance.pitch = 1;
+      speechSynthesis.speak(utterance);
+    }
+
+    function getTimeGreeting() {
+      const hour = new Date().getHours();
+      if (hour < 12) return "Good morning";
+      if (hour < 18) return "Good afternoon";
+      return "Good evening";
+    }
+
+    function getCheapestDay(state, month) {
+      const days = [3, 7, 11, 15, 19, 23, 27];
+      const random = days[Math.floor(Math.random() * days.length)];
+      return 📆 In ${month}, the cheapest flight from ${state} is usually on day ${random} (Tuesdays and Wednesdays are best!).;
+    }
+
+    function botResponse(userText) {
+      const lowerText = userText.toLowerCase();
+      let response = "🌍 I'm SkyBot! Ask me about flight prices. ✈️";
+
+      if (/price/i.test(lowerText)) {
+        response = "Which route and travel date are you looking for? 🗓️";
+      } else if (/delhi to mumbai/i.test(lowerText)) {
+        response = "🛫 Delhi to Mumbai: ₹4,500 on 25th April 📆";
+      } else if (/bangalore to chennai/i.test(lowerText)) {
+        response = "🛫 Bangalore to Chennai: ₹3,200 on 25th April 🌆";
+      } else if (/kolkata to pune/i.test(lowerText)) {
+        response = "🛫 Kolkata to Pune: ₹5,100 on 25th April 🌇";
+      } else if (/hydrabad to jaipur/i.test(lowerText) || /hyderabad to jaipur/i.test(lowerText)) {
+        response = "🛫 Hyderabad to Jaipur: ₹4,700 on 25th April 🕌";
+      } else if (/mumbai to goa/i.test(lowerText)) {
+        response = "🛫 Mumbai to Goa: ₹2,900 on 25th April 🌴";
+      } else if (/lucknow to delhi/i.test(lowerText)) {
+        response = "🛫 Lucknow to Delhi: ₹3,600 on 25th April 🏙️";
+      } else if (/travel tip/i.test(lowerText)) {
+        response = "🧳 Travel Tip: Always keep a digital and hard copy of your important documents!";
+      } else if (/cheapest.*(day|date).*from (\w+)/i.test(lowerText)) {
+        const match = lowerText.match(/cheapest.*(day|date).*from (\w+)/i);
+        const state = match[2];
+        const month = new Date().toLocaleString('default', { month: 'long' });
+        response = getCheapestDay(state.charAt(0).toUpperCase() + state.slice(1), month);
+      } else if (/thank/i.test(lowerText)) {
+        response = "😊 You’re welcome! Let me know if you need more flight info. Have a safe flight! ✈️";
+      } else if (/bye/i.test(lowerText)) {
+        response = "👋 Goodbye! Have a great journey ahead! 🌈✈️";
+      } else if (/help/i.test(lowerText)) {
+        response = Here’s what I can do:<br>🛫 Show flight prices<br>💡 Give travel tips<br>📆 Tell cheapest travel days from any Indian state<br>🔊 Speak responses aloud!;
+      }
+
+      const typingEl = addMessage("", "bot", true);
+      setTimeout(() => {
+        typingEl.innerHTML = response;
+        speak(response);
+      }, 1000);
+    }
+
+    function sendMessage() {
+      const input = document.getElementById("user-input");
+      const userText = input.value.trim();
+      if (!userText) return;
+      addMessage(userText, "user");
+      botResponse(userText);
+      input.value = "";
+    }
+
+    function quickSend(text) {
+      document.getElementById("user-input").value = text;
+      sendMessage();
+    }
+
+    window.onload = () => {
+      const greeting = getTimeGreeting();
+      botResponse(${greeting}! I'm SkyBot, your travel assistant. ✈️ Type 'Help' to know what I can do.);
+    }
+  </script>
+</body>
+</html>
